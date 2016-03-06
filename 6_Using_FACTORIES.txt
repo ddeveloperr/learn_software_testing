@@ -1,0 +1,166 @@
+
+
+1. FACTORIES
+
+Convert the zombies fixture to a Factory Girl Factory called :zombie.
+
+FactoryGirl.define do
+  
+end
+Create a :zombie factory
+FactoryGirl.define do
+  factory :zombie do
+    
+  end
+end
+The Correct answer is:
+FactoryGirl.define do
+  factory :zombie do
+    name 'Sally'
+    graveyard 'Valley Dim'
+  end
+end
+
+2. COMPLEX FACTORIES
+
+Use a nested Factory Girl definition to create zombie factories named :sally and :moe, using the data from the fixtures below.
+
+Define a base zombie factory
+FactoryGirl.define do
+  factory :zombie do
+    name 'Ash'
+    graveyard 'Petrosville'
+
+  end
+end
+Create a :sally zombie.
+FactoryGirl.define do
+  factory :zombie do
+    name 'Ash'
+    graveyard 'Petrosville'
+
+    factory :sally do
+      name 'Sally'
+      graveyard 'Valley Dim'
+    end
+  end
+end
+The correct answer is:
+FactoryGirl.define do
+  factory :zombie do
+    name 'Ash'
+    graveyard 'Petrosville'
+
+    factory :sally do
+      name 'Sally'
+      graveyard 'Valley Dim'
+    end
+
+    factory :moe do
+      name 'Moe'
+    end
+  end
+end
+
+3. UNIQUE ATTRIBUTES
+
+Refactor the zombie factory using a sequence so that we get a unique name and graveyard everytime we create a new zombie.
+
+Use a sequence to create an unique zombie name.
+FactoryGirl.define do
+  factory :zombie do
+    sequence(:name) {|i| "Ash#{i}"}
+    graveyard 'Petrosville Cemetary'
+  end
+end
+The correct answer is:
+FactoryGirl.define do
+  factory :zombie do
+    sequence(:name) {|i| "Ash#{i}"}
+    sequence(:graveyard) { |i| "Petrosville Cemetary #{i}" }
+  end
+end
+
+4. ASSOCIATIONS
+
+Create a tweet factory with a zombie association, don't forget to set a tweet status.
+
+Add a tweet status.
+FactoryGirl.define do
+  factory :tweet do
+    status 'I love how your brains feel'
+    
+  end
+end
+The correct answer is:
+FactoryGirl.define do
+  factory :tweet do
+    status 'I love how your brains feel'
+    association :zombie
+  end
+end
+
+5. USING FACTORIES
+
+Using factories write a test to verify that a tweet is invalid without a status. Be sure to build the Tweet, rather than create it.
+
+Build a new tweet factory.
+class TweetTest < ActiveSupport::TestCase
+
+  test "A tweet requires a status" do
+    tweet = Factory.build
+  end
+end
+Make sure to select which tweet to build and set the status to nil
+class TweetTest < ActiveSupport::TestCase
+
+  test "A tweet requires a status" do
+    tweet = Factory.build(:tweet, status: nil)
+
+  end
+end
+The correct answer is:
+class TweetTest < ActiveSupport::TestCase
+
+  test "A tweet requires a status" do
+    tweet = Factory.build(:tweet, status: nil)
+    assert !tweet.valid?, "Status is not being validated"
+  end
+end
+
+6. USING FACTORIES II
+
+Create a tweet using a factory. Then, using Capybara, go to the tweets_url, click on the tweet.status link.
+Finally, assert that the tweet's show page contains the @tweet.zombie.name in its h3.
+Use Capybara's within and has_content? methods.
+
+Create a tweet from the given factories.
+class TweetTest < ActionDispatch::IntegrationTest
+  test "create a tweet factory" do 
+    tweet = Factory(:tweet)
+
+  end
+end
+Visit the tweets_url
+class TweetTest < ActionDispatch::IntegrationTest
+  test "tweet page has zombie link" do 
+    tweet = Factory(:tweet)
+
+    visit tweets_url
+
+  end
+end
+The correct answer is:
+class TweetTest < ActionDispatch::IntegrationTest
+  test "tweet page has zombie name" do 
+    tweet = Factory(:tweet)
+
+    visit tweets_url
+
+    click_link tweet.status
+
+    within("h3") do
+      assert has_content?(tweet.zombie.name)
+    end
+  end
+end

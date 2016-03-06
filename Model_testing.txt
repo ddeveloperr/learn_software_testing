@@ -1,0 +1,235 @@
+
+MODEL TESTING in RUBY
+---------------------
+
+1. FIRST MODEL TEST
+Using an assert and the valid? method, test that a 'tweet' is not valid without a status.
+
+class TweetTest < ActiveSupport::TestCase
+  test "invalid without a status" do
+    tweet = Tweet.new
+    assert !tweet.valid?, "Status is not being Validated"
+  end
+end
+
+2. PREPARE THE DB
+
+How to Execute the rake command which prepares the test database for tests.
+
+$ rake db:test:prepare
+
+3. RUNNING TESTS
+
+Execute the rake command which will run both db:test:prepare and all the tests.
+
+$ rake
+
+4. VALID WITH ATTRIBUTES
+
+Lets try another validation test. This time, test to make sure a tweet is valid with all its attributes before save.
+A tweet has a zombie and a status (you'll need to create a zombie for this).
+
+tweet.rb
+class TweetTest < ActiveSupport::TestCase
+  test "valid with all attributes" do
+    zombie = Zombie.new
+    tweet = Tweet.new
+
+    tweet.status = 'I want to eat your brain. <3'
+    tweet.zombie = zombie
+
+    assert tweet.valid?, "tweet isn't valid"
+  end
+end
+-------
+tweet_test.rb
+
+class TweetTest < ActiveSupport::TestCase
+  test "valid with all attributes" do
+    zombie = Zombie.new
+    tweet = Tweet.new
+
+    tweet.status = 'I want to eat your brain. <3'
+    tweet.zombie = zombie
+
+    assert tweet.valid?, "tweet isn't valid"
+  end
+end
+-------------
+
+5. FIXTURES
+
+Create a tweets fixture in the tweets.yml file. The Tweet model has a zombie_id that's an Integer and a status that's a String.
+/tweets.yml
+hello_world:
+  zombie_id: 1
+  status: "Hello World"
+  
+6. TESTS WITH FIXTURES
+
+Now that we have fixtures tweets.yml and zombies.ymlbelow, let's clean up some tests. Add fixtures to the following tests.
+
+class TweetTest < ActiveSupport::TestCase
+  test "valid with all attributes" do
+    tweet = tweets(:hello_world)
+    assert tweet.valid?, "tweet isn't valid"
+  end
+end
+
+7. MODEL METHODS
+
+Create a test that ensures the brains? method returns true if a status contains 'brains'.
+
+class TweetTest < ActiveSupport::TestCase
+  test "can detect brains" do
+    tweet = tweets(:hello_world)
+    tweet.status = "Love me some brains"
+
+    assert tweet.brains?, "tweet can't detect brains"
+  end
+end
+
+8. TESTING RELATIONSHIPS
+
+Create a test to ensure that the hello_world tweet contains zombie Ash.
+
+class TweetTest < ActiveSupport::TestCase
+  test "tweet contains a zombie" do
+    tweet = tweets(:hello_world)
+    assert_equal zombies(:ash), tweet.zombie, "tweet doesn't contain a zombie"
+  end
+end
+
+9. SETUP METHOD
+
+Refactor the following code using a setup method to create the tweet, and properly use instance variables.
+
+class TweetTest < ActiveSupport::TestCase
+  test "invalid without a status" do
+    tweet = tweets(:hello_world)
+    tweet.status = nil
+    assert !tweet.valid?, "Status is not being Validated"
+  end
+
+  test "valid with all attributes" do
+    tweet = tweets(:hello_world)
+    assert tweet.valid?, "tweet isn't valid"
+  end
+end
+
+-- Solution
+
+The correct answer after replacing existing tweets with the instance variable:
+class TweetTest < ActiveSupport::TestCase
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  test "invalid without a status" do
+    @tweet.status = nil
+    assert !@tweet.valid?, "Status is not being Validated"
+  end
+
+  test "valid with all attributes" do
+    assert @tweet.valid?, "tweet isn't valid"
+  end
+end
+
+10. CUSTOM ASSERT
+
+Refactor the following tests to use our custom assert method assert_attribute_is_validated to test attribute validations.
+
+class TweetTest < ActiveSupport::TestCase
+
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  # Don't change this, use it to refactor the tests below.
+  def assert_attribute_is_validated(model, attribute)
+    # This line sets the specified attribute to nil 
+    model.assign_attributes(attribute => nil)
+    assert !model.valid?, "#{attribute.to_s} is not being validated"
+  end
+
+  test "invalid without a status" do  
+    @tweet.status = nil
+    assert !@tweet.valid?, "Status is not being Validated"
+  end
+
+  test "invalid without a zombie" do
+    @tweet.zombie = nil
+    assert !@tweet.valid?, "zombie is not being Validated"
+  end
+end
+
+-- Solutions
+class TweetTest < ActiveSupport::TestCase
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  def assert_attribute_is_validated(model, attribute)
+    model.assign_attributes(attribute => nil)
+    assert !model.valid?, "#{attribute.to_s} is not being validated"
+  end
+
+  test "invalid without a status" do  
+    assert_attribute_is_validated @tweet, :status
+  end
+
+  test "invalid without a zombie" do
+    assert_attribute_is_validated @tweet, :zombie
+  end
+end
+
+11. TEST HELPER
+
+Move the assert_attribute_is_validated method into the test_helper.rb so that all courses have access to it.
+
+class TweetTest < ActiveSupport::TestCase
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  def assert_attribute_is_validated(model, attribute)
+    model.assign_attributes(attribute => nil)
+    assert !model.valid?, "#{attribute.to_s} is not being validated"
+  end
+
+  #you don't need to touch this
+  test "invalid without a status" do
+    assert_attribute_is_validated @tweet, :status
+  end
+
+  #you don't need to touch this
+  test "invalid without a zombie" do
+    assert_attribute_is_validated @tweet, :zombie
+  end
+end
+
+-- Solution
+
+Remove the assert_attribute_is_validated method from tweet_test.rb
+class TweetTest < ActiveSupport::TestCase
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  test "invalid without a status" do
+    assert_attribute_is_validated @tweet, :status
+  end
+
+  test "invalid without a zombie" do
+    assert_attribute_is_validated @tweet, :zombie
+  end
+end
+The answer is correct when the assert_attribute_is_validated is in the test_helper.rb file
+# test_helper.rb
+class ActiveSupport::TestCase
+  def assert_attribute_is_validated(model, attribute)
+    model.assign_attributes(attribute => nil)
+    assert !model.valid?, "\#{attribute.to_s} is not being validated"
+  end
+end
+

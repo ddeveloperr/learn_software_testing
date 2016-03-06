@@ -1,0 +1,44 @@
+
+1. INTRODUCING SHOULDA
+
+Using shoulda, test to make sure status and zombie are present.
+model/tweeet.rb
+
+-- Solution
+Use should validate_presence_of to check for status validation.
+class TweetTest < ActiveSupport::TestCase
+  should validate_presence_of(:status)
+end
+The correct answer is:
+class TweetTest < ActiveSupport::TestCase
+  should validate_presence_of(:status)
+  should validate_presence_of(:zombie)
+end
+
+2. SHOULDA I 
+
+Using shoulda, test to make sure tweet.id is a number and a unique value.
+
+Use should validate_numericality_of to validate if :id is a number.
+class TweetTest < ActiveSupport::TestCase
+   should validate_numericality_of(:id)
+end
+The correct answer is:
+class TweetTest < ActiveSupport::TestCase
+   should validate_numericality_of(:id)
+   should validate_uniqueness_of(:id)
+end
+
+3. SHOULDA II
+
+Using shoulda, test to make sure tweet.status has to be between 3 and 140 characters in length.
+
+Use should ensure_length_of check that status is the correct length
+class TweetTest < ActiveSupport::TestCase
+   should ensure_length_of
+end
+
+The correct answer is:
+class TweetTest < ActiveSupport::TestCase
+   should ensure_length_of(:status).is_at_least(3).is_at_most(140)
+end

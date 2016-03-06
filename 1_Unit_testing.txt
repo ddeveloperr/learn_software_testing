@@ -1,5 +1,4 @@
-
-UNIT TEST examples:
+Basic Unit testing exercises in Ruby
 
 1. Basic Test
    Write a basic conditional test using assert which checks if 1 > 0. Name your test class ConditionalTest.

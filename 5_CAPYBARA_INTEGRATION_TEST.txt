@@ -1,0 +1,112 @@
+
+1. CAPYBARA INTEGRATION TEST
+
+Rewrite the Rails integration test for viewing a Tweet with Capybara.
+
+Use visit instead of get to visit the tweet_url of @tweet.
+class TweetDisplaysStatusTest < ActionDispatch::IntegrationTest
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  test "Tweet displays status in heading" do
+    visit tweet_url @tweet
+    
+    assert_select 'h1', @tweet.status
+  end
+end
+Use a within block to look in the h1 tags for @tweet.status
+class TweetDisplaysStatusTest < ActionDispatch::IntegrationTest
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  test "Tweet displays status in heading" do 
+    visit tweet_url @tweet
+
+    within("h1") do
+      
+    end
+  end
+end
+The correct answer is:
+class TweetDisplaysStatusTest < ActionDispatch::IntegrationTest
+  def setup
+    @tweet = tweets(:hello_world)
+  end
+
+  test "Tweet displays status in heading" do 
+    visit tweet_url @tweet
+
+    within("h1") do
+      assert has_content?(@tweet.status)
+    end
+  end
+end
+
+2. CAPYBARA INTEGRATION TEST II
+250Points
+Using Capybara, test that tweet creation works properly. The url to the tweet creation page is new_tweet_url. 
+Hint: You should assert that you've ended up at 'tweet_path(Tweet.last)' after submitting the form.
+Take a close look at the new.html file below to determine the labels and contents of the form fields.
+
+Visit the new_tweet_url
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should create a new tweet' do
+    visit new_tweet_url
+    
+  end
+end
+Fill in the form to create a tweet.
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should create a new tweet' do
+    visit new_tweet_url
+    fill_in 'Status', with: 'I love the way your brain feels'
+    select 'Ash', from: 'Zombie'
+    click_button 'Create Tweet'
+    
+  end
+end
+The correct answer is:
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should create a new tweet' do
+    visit new_tweet_url
+    fill_in 'Status', with: 'I love the way your brain feels'
+    select 'Ash', from: 'Zombie'
+    click_button 'Create Tweet'
+
+    assert_equal tweet_path(Tweet.last), current_path
+  end
+end
+
+3. CAPYBARA INTEGRATION TEST III
+
+Now lets test that from the home page root_path we can click the New Tweet link and it brings us to the new_tweet_path.
+
+Visit the root_url.
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should go to new tweet page' do
+    visit root_url
+    
+  end
+end
+Click on the New Tweet link.
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should go to new tweet page' do
+    visit root_url
+    click_link 'New Tweet'
+    
+  end
+end
+
+The correct answer is:
+class CreatingATweetTest < ActionDispatch::IntegrationTest
+  test 'should go to new tweet page' do
+    visit root_url
+    click_link 'New Tweet'
+
+    assert_equal new_tweet_path, current_path
+  end
+end
+
+

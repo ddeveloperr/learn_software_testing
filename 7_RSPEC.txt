@@ -1,0 +1,236 @@
+
+1. Describe
+
+Lets start writing a specification for the Tweet class. Write a describe block for the Tweet model without any examples inside it.
+
+describe Tweet do
+  
+end
+
+2. It
+
+Now create a pending test called "can set status".
+
+The correct answer is:
+describe Tweet do
+  it "can set status"
+end
+
+3. Expectation
+
+Now let's write the example. Go ahead and instantiate a tweet, give it the status "Nom nom nom", and test the status has been 
+properly set to this value using an == equality matcher.
+
+https://gist.github.com/codeschool-courses/2960387#file-tweet-rb
+
+describe Tweet do
+  it "has a status of 'Nom nom nom'" do
+    tweet = Tweet.new
+    tweet.status = "Nom nom nom"
+    tweet.status.should == "Nom nom nom"
+  end
+end
+
+4. Matchers
+
+Using a predicate 'be' matcher, make sure that a tweet like "Nom nom nom" (which is not a reply because it doesn't start with
+an '@' sign) is public.
+
+describe Tweet do
+  it 'without a leading @ symbol should be public' do
+    tweet = Tweet.new(status: 'Nom nom nom')
+    tweet.should be_public
+  end
+end
+
+5. Comparison Matchers
+
+Finish the example below to ensure that our tweet.status.length is less than or equal to 140 characters.
+Use a be matcher in your spec.
+
+describe Tweet do
+  it 'truncates the status to 140 characters' do
+    tweet = Tweet.new(status: 'Nom nom nom' * 100 )
+    tweet.status.length.should be <= 140
+  end
+end
+
+6. Installing RSpec
+
+In this level we'll start by getting you setup on a regular Ruby project, then move onto using RSpec within Rails.
+Let's start by installing the rspec gem from the console.
+
+$ gem install rspec
+
+7. Command Line
+
+With the RSpec gem installed, you will have access to the command line tool, rspec.
+RSpec has a few settings you can configure, so to help us get started, let's initialize this as an RSpec project.
+This will generate a placeholder for our RSpec configuration.
+
+$ rspec --init
+
+8. Rails Configuration
+
+Using rspec --init will setup RSpec within a ruby project, but for the rest of this course we'll be using RSpec
+within a Rails project. Run the rails generator to install RSpec into the current Rails project.
+
+$ rails g rspec:install
+
+9. Running specs from the command line
+
+We now have a Rails project all setup and we've created spec/models/zombie_spec.rb for you.
+Run this spec from the command line with color on, and specify documentation format.
+
+rspec --color --format documentation spec/models/zombie_spec.rb
+
+10. Predicate Matchers
+
+Refactor the following spec to use an include matcher.
+
+describe Zombie do
+  it 'includes a tweet' do
+    tweet = Tweet.new
+    zombie = Zombie.new(tweets: [tweet])
+    zombie.tweets.should include(tweet)
+  end
+end
+
+11. Change Matcher
+
+In the following example, we're checking to see that a method changes the state of a zombie. We need to make sure the zombie was in a specific state before and after the method is called.
+Refactor the following example to use the expect and change syntax.
+
+describe Zombie do
+  it 'gains 3 IQ points by eating brains' do
+    zombie = Zombie.new
+    expect { zombie.eat_brains }.to change { zombie.iq }.by(3)
+  end
+end
+
+12. Have Matcher
+
+We're verifying the count to be greater than 0, but we really could be using a have matcher here to verify that the 
+zombie has exactly one tweet. Refactor the spec to use the have matcher.
+
+describe Zombie do
+  it 'increases the number of tweets' do
+    zombie = Zombie.new(name: 'Ash')
+    zombie.tweets.new(message: "Arrrgggggggghhhhh")
+    zombie.should have(1).tweet
+  end
+end
+
+13. Raises an Error
+
+Testing for exceptions is tricky business. Refactor the spec below to use the raise_error matcher with an expect block.
+
+describe Zombie do
+  it 'raises a Zombie::NotSmartEnoughError if not able to make a decision' do
+    zombie = Zombie.new
+    expect { zombie.make_decision! }.to raise_error(Zombie::NotSmartEnoughError)
+  end
+end
+
+14. Implicit Subject
+
+Add the implicit subject rather than creating a new Zombie and then simplify the example to use it { }
+
+describe Zombie do
+  it { should_not be_genius }
+end
+
+15. Its Attribute
+
+Refactor the following code to use its but use the same matcher.
+
+describe Zombie do
+  its(:iq) { should == 0 }
+end
+
+16. Refactoring into Contexts
+
+Notice how we have two expectations on a zombie object with a high iq. We should clean this up by creating a
+context for the high iq zombie and making that zombie the subject of that context. Next, refactor the two
+expectations to use the implicit subject that we learned about in the previous challenge.
+
+describe Zombie do
+  it { should_not be_genius }
+  its(:iq) { should == 0 }
+
+  context "with high iq" do
+    subject { Zombie.new(iq: 3) }
+    it { should be_genius }
+    its(:brains_eaten_count) { should == 1 }
+  end
+end
+
+17. Subject with Lets
+
+Rather than declaring our zombie directly in the subject block as we're doing here, move it into its own let
+named zombie and update the subject to reference this new zombie.
+
+describe Zombie do
+  let(:zombie) { Zombie.new(tweets: [tweet]) }
+  let(:tweet) { Tweet.new }
+
+  subject { zombie }
+
+  its(:tweets) { should include(tweet) }
+
+  it "should have a latest tweet" do
+    zombie.latest_tweet.should == tweet
+  end
+end
+
+18. Method as a subject
+
+Make the two small changes which will allow these two tests to pass.
+
+describe Zombie do
+  context "with high iq" do
+     let!(:zombie) { Zombie.create(iq: 3, name: 'Anna') }
+     subject { zombie }
+
+     it "should be returned with genius" do
+       Zombie.genius.should include(zombie)
+     end
+
+     it "should have a genius count of 1" do     
+       Zombie.genius.count.should == 1
+     end
+  end
+end
+
+20. Clean up your code with before
+
+Refactor the zombie spec to use a before hook. For bonus points refactor the examples to one line.
+
+describe Zombie do
+  let(:zombie) { Zombie.new }
+  subject { zombie }
+  before { zombie.eat_brains }
+
+  it 'is not a dummy zombie' do
+    zombie.should_not be_dummy
+  end
+
+  it 'is a genius zombie' do
+    zombie.should be_genius
+  end
+end
+
+-----------
+Helpful Resources
+
+Here are a few useful links which are referenced in the course and video. Below, you can find your achievements and awards.
+
+Below, you can find your course achievements and awards. Here are some useful links referenced in the video:
+
+https://github.com/rspec/rspec
+https://www.relishapp.com/rspec
+https://www.codeschool.com/screencasts/guard-and-spork
+https://www.destroyallsoftware.com/screencasts
+https://github.com/thoughtbot/shoulda-matchers
+https://pragprog.com/book/achbd/the-rspec-book
+http://blog.davidchelimsky.net/
